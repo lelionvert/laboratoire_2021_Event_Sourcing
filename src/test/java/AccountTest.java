@@ -84,5 +84,5 @@ class AccountTest {
     Amount balance = account.balance();
     assertThat(balance).isEqualTo(new Amount(BigDecimal.ZERO));
   }
-  
+
 }
