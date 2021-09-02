@@ -1,6 +1,9 @@
+package domain;
+
+import domain.events.TransactionEvent;
 import java.util.List;
 
-public interface EventStream {
+public interface TransactionHistory {
 
   List<TransactionEvent> all();
 

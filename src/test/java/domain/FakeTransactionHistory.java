@@ -1,16 +1,16 @@
-import static java.util.stream.Collectors.toUnmodifiableList;
+package domain;
 
+import domain.events.TransactionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FakeEventStream implements EventStream {
+public class FakeTransactionHistory implements TransactionHistory {
 
   private final List<TransactionEvent> events = new ArrayList<>();
 
   @Override
   public List<TransactionEvent> all() {
-    return events.stream()
-        .collect(toUnmodifiableList());
+    return events.stream().toList();
   }
 
   @Override

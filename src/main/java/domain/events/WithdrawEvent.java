@@ -1,3 +1,7 @@
+package domain.events;
+
+import domain.Amount;
+
 public record WithdrawEvent(Amount amount) implements TransactionEvent {
 
   @Override

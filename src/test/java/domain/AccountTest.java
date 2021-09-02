@@ -1,8 +1,10 @@
-import static org.assertj.core.api.Assertions.as;
+package domain;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
+import domain.events.DepositEvent;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -15,12 +17,12 @@ class AccountTest {
 
   private static final Amount AMOUNT_TEN = new Amount(BigDecimal.TEN);
   @Mock
-  private EventStream eventStream;
+  private TransactionHistory transactionHistory;
 
   @Test
   void new_account_should_have_initial_balance_at_0() {
-    given(eventStream.all()).willReturn(List.of());
-    Account account = new Account(eventStream);
+    given(transactionHistory.all()).willReturn(List.of());
+    Account account = new Account(transactionHistory);
 
     Amount amount = account.balance();
 
@@ -29,8 +31,8 @@ class AccountTest {
 
   @Test
   void deposit_should_add_amount_in_balance() {
-    EventStream fakeEventStream = new FakeEventStream();
-    Account account = new Account(fakeEventStream);
+    TransactionHistory fakeTransactionHistory = new FakeTransactionHistory();
+    Account account = new Account(fakeTransactionHistory);
 
     account.deposit(AMOUNT_TEN);
     Amount amount = account.balance();
@@ -40,17 +42,17 @@ class AccountTest {
 
   @Test
   void deposit_should_publish_deposit_event() {
-    Account account = new Account(eventStream);
+    Account account = new Account(transactionHistory);
 
     account.deposit(AMOUNT_TEN);
 
-    then(eventStream).should().publish(new DepositEvent(AMOUNT_TEN));
+    then(transactionHistory).should().publish(new DepositEvent(AMOUNT_TEN));
   }
 
   @Test
   void account_with_moula_should_have_one_deposit_of_moula() {
-    given(eventStream.all()).willReturn(List.of(new DepositEvent(AMOUNT_TEN)));
-    Account account = new Account(eventStream);
+    given(transactionHistory.all()).willReturn(List.of(new DepositEvent(AMOUNT_TEN)));
+    Account account = new Account(transactionHistory);
 
     Amount balance = account.balance();
 
@@ -59,8 +61,8 @@ class AccountTest {
 
   @Test
   void balance_is_sum_of_deposits() {
-    given(eventStream.all()).willReturn(List.of(new DepositEvent(AMOUNT_TEN), new DepositEvent(AMOUNT_TEN)));
-    Account account = new Account(eventStream);
+    given(transactionHistory.all()).willReturn(List.of(new DepositEvent(AMOUNT_TEN), new DepositEvent(AMOUNT_TEN)));
+    Account account = new Account(transactionHistory);
     Amount balance = account.balance();
 
     assertThat(balance).isEqualTo(new Amount(new BigDecimal(20)));
@@ -68,8 +70,8 @@ class AccountTest {
 
   @Test
   void withdraw_should_subtract_amount_from_balance() {
-    EventStream fakeEventStream = new FakeEventStream();
-    Account account = new Account(fakeEventStream);
+    TransactionHistory fakeTransactionHistory = new FakeTransactionHistory();
+    Account account = new Account(fakeTransactionHistory);
     account.withdraw(AMOUNT_TEN);
     Amount balance = account.balance();
     assertThat(balance).isEqualTo(new Amount(new BigDecimal(-10)));
@@ -77,7 +79,7 @@ class AccountTest {
 
   @Test
   void multiple_withdraws_and_deposits_should_compute_balance(){
-    FakeEventStream fakeEventStream = new FakeEventStream();
+    FakeTransactionHistory fakeEventStream = new FakeTransactionHistory();
     Account account = new Account(fakeEventStream);
     account.deposit(AMOUNT_TEN);
     account.withdraw(AMOUNT_TEN);
