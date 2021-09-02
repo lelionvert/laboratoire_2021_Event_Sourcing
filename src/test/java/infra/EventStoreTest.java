@@ -69,4 +69,23 @@ class EventStoreTest {
     assertThat(actual.getString("type")).isEqualTo("withdraw");
     assertThat(actual.getDouble("amount")).isEqualTo(10.0);
   }
+
+  @Test
+  void find_shoul_return_list_of_transaction_event() {
+    Document depositDocument = new Document();
+    depositDocument.append("type", "deposit");
+    depositDocument.append("amount", 10.0);
+
+    Document withdrawDocument = new Document();
+    withdrawDocument.append("type", "withdraw");
+    withdrawDocument.append("amount", 10.0);
+
+    transactions.insertMany(List.of(depositDocument, withdrawDocument));
+
+    EventStore eventStore = new EventStore(mongoDatabase);
+
+    List<TransactionEvent> events = eventStore.find();
+
+    assertThat(events).containsOnly(new DepositEvent(new Amount(BigDecimal.TEN.setScale(1))), new WithdrawEvent(new Amount(BigDecimal.TEN.setScale(1))));
+  }
 }
